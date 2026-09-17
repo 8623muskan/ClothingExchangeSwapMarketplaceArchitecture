@@ -1,0 +1,9 @@
+﻿[build]
+  base = "server/client"
+  command = "npm run build"
+  publish = "dist/client/browser"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.csr.html"
+  status = 200
