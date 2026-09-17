@@ -1,0 +1,694 @@
+﻿<div class="marketplace-page">
+
+  <!-- Luxury Background -->
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <!-- Hero -->
+  <section class="marketplace-hero">
+
+    <div class="hero-inner">
+
+      <div class="hero-copy">
+
+        <div class="eyebrow">
+          <span class="eyebrow-line"></span>
+          PREMIUM CLOTHING EXCHANGE
+        </div>
+
+        <h1>
+          Find pieces
+          <span>worth wearing.</span>
+        </h1>
+
+        <p>
+          Discover pre-loved fashion, exchange your style,
+          and give every garment a second life.
+        </p>
+
+        <div class="hero-actions">
+
+          <button
+            type="button"
+            class="primary-action"
+            (click)="showFilters = true">
+
+            <span>Explore Marketplace</span>
+            <span class="action-arrow">&#9881;</span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="hero-stat-card">
+
+        <div class="stat-icon">
+          ✦
+        </div>
+
+        <div class="stat-label">
+          AVAILABLE ITEMS
+        </div>
+
+        <div class="stat-number">
+          {{ filteredItems.length }}
+        </div>
+
+        <div class="stat-caption">
+          Ready to discover
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- Main -->
+  <main class="marketplace-main">
+
+    <!-- Search Bar -->
+    <section class="search-section">
+
+      <div class="search-heading">
+
+        <div>
+          <div class="section-eyebrow">
+            DISCOVER YOUR STYLE
+          </div>
+
+          <h2>
+            What are you looking for?
+          </h2>
+
+          <p>
+            Search the marketplace or refine your results below.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="filter-toggle"
+          (click)="toggleFilters()">
+
+          <span>☷</span>
+          Filters
+
+          <span
+            *ngIf="activeFilterCount > 0"
+            class="filter-count">
+            {{ activeFilterCount }}
+          </span>
+
+        </button>
+
+      </div>
+
+
+      <div class="search-bar">
+
+        <span class="search-icon">
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          [(ngModel)]="filters.search"
+          (keyup.enter)="searchMarketplace()"
+          placeholder="Search dresses, jackets, Nike, denim..."
+          aria-label="Search marketplace"
+        />
+
+        <button
+          type="button"
+          class="search-button"
+          (click)="searchMarketplace()">
+
+          Search
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- Filters -->
+    <section
+      *ngIf="showFilters"
+      class="filters-panel">
+
+      <div class="filters-header">
+
+        <div>
+
+          <h3>
+            Refine your selection
+          </h3>
+
+          <p>
+            Choose a gender first to see relevant clothing categories.
+          </p>
+
+        </div>
+
+        <button
+          *ngIf="hasActiveFilters"
+          type="button"
+          class="clear-button"
+          (click)="clearFilters()">
+
+          Clear all
+
+        </button>
+
+      </div>
+
+
+      <!-- Gender -->
+      <div class="filter-block">
+
+        <div class="filter-title">
+          <span>01</span>
+          WHO ARE YOU SHOPPING FOR?
+        </div>
+
+        <div class="gender-grid">
+
+          <button
+            *ngFor="let gender of genders"
+            type="button"
+            class="gender-card"
+            [class.active]="filters.gender === gender"
+            (click)="selectGender(gender)">
+
+            <span class="gender-icon">
+
+              <ng-container [ngSwitch]="gender">
+
+                <span *ngSwitchCase="'Men'">♙</span>
+                <span *ngSwitchCase="'Women'">♕</span>
+                <span *ngSwitchCase="'Boys'">◈</span>
+                <span *ngSwitchCase="'Girls'">◇</span>
+                <span *ngSwitchCase="'Kids'">✦</span>
+                <span *ngSwitchDefault>&#10022;</span>
+
+              </ng-container>
+
+            </span>
+
+            <span>
+              {{ gender }}
+            </span>
+
+            <span
+              *ngIf="filters.gender === gender"
+              class="selected-check">
+              ✓
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- Category -->
+      <div class="filter-block">
+
+        <div class="filter-title">
+          <span>02</span>
+          CATEGORY
+        </div>
+
+        <div class="category-scroll">
+
+          <button
+            *ngFor="let category of availableCategories"
+            type="button"
+            class="category-chip"
+            [class.active]="filters.category === category"
+            (click)="selectCategory(category)">
+
+            {{ category }}
+
+          </button>
+
+          <button
+      type="button"
+      class="list-item-btn"
+      (click)="goToListItem()"
+>
+       + List an Item
+      </button>
+        </div>
+
+      </div>
+
+
+      <!-- Advanced Filters -->
+      <div class="advanced-filters">
+
+        <!-- Size -->
+        <div class="field">
+
+          <label>
+            SIZE
+          </label>
+
+          <select
+            [(ngModel)]="filters.size"
+            (ngModelChange)="applyFilters()">
+
+            <option value="">
+              All Sizes
+            </option>
+
+            <option
+              *ngFor="let size of sizes"
+              [value]="size">
+
+              {{ size }}
+
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- Brand -->
+        <div class="field">
+
+          <label>
+            BRAND
+          </label>
+
+          <select
+            [(ngModel)]="filters.brand"
+            (ngModelChange)="applyFilters()">
+
+            <option value="">
+              All Brands
+            </option>
+
+            <option
+              *ngFor="let brand of brands"
+              [value]="brand">
+
+              {{ brand }}
+
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- Condition -->
+        <div class="field">
+
+          <label>
+            CONDITION
+          </label>
+
+          <select
+            [(ngModel)]="filters.condition"
+            (ngModelChange)="applyFilters()">
+
+            <option value="">
+              Any Condition
+            </option>
+
+            <option
+              *ngFor="let condition of conditions"
+              [value]="condition">
+
+              {{ condition }}
+
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- Color -->
+        <div class="field">
+
+          <label>
+            COLOR
+          </label>
+
+          <select
+            [(ngModel)]="filters.color"
+            (ngModelChange)="applyFilters()">
+
+            <option value="">
+              Any Color
+            </option>
+
+            <option
+              *ngFor="let color of colors"
+              [value]="color">
+
+              {{ color }}
+
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Results Header -->
+    <section class="results-header">
+
+      <div>
+
+        <div class="section-eyebrow">
+          MARKETPLACE
+        </div>
+
+        <h2>
+          Curated for you
+        </h2>
+
+      </div>
+
+      <div class="results-meta">
+
+        <span>
+          {{ filteredItems.length }} items
+        </span>
+
+        <span class="results-dot"></span>
+
+        <span>
+          Latest listings
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <!-- Loading -->
+    <section
+      *ngIf="loading"
+      class="loading-state">
+
+      <div class="loading-orbit">
+        <div></div>
+      </div>
+
+      <h3>
+        Curating your marketplace
+      </h3>
+
+      <p>
+        Finding the latest clothing listings...
+      </p>
+
+    </section>
+
+
+    <!-- Error -->
+    <section
+      *ngIf="errorMessage && !loading"
+      class="error-state">
+
+      <div class="error-icon">
+        !
+      </div>
+
+      <div>
+
+        <h3>
+          Marketplace unavailable
+        </h3>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        (click)="loadItems()">
+
+        Try again
+
+      </button>
+
+    </section>
+
+
+    <!-- Product Grid -->
+    <section
+      *ngIf="!loading && !errorMessage && filteredItems.length > 0"
+      class="product-grid">
+
+      <article
+        *ngFor="let item of filteredItems; trackBy: trackByItem"
+        class="product-card"
+        [class.selected]="isSelected(item)"
+        (click)="selectItem(item)">
+
+
+        <!-- Product Image -->
+        <div class="product-image">
+
+          <img
+            [src]="getImage(item)"
+            [alt]="item.title || 'Clothing item'"
+            loading="lazy"
+          />
+
+          <div class="image-overlay"></div>
+
+
+          <!-- Category -->
+          <span class="product-category">
+            {{ item.category || 'Clothing' }}
+          </span>
+
+
+          <!-- Condition -->
+          <span
+            *ngIf="item.condition"
+            class="condition-badge">
+
+            {{ item.condition }}
+
+          </span>
+
+
+          <!-- Select -->
+          <button
+            type="button"
+            class="select-product"
+            [class.active]="isSelected(item)"
+            (click)="$event.stopPropagation(); selectItem(item)">
+
+            <span *ngIf="!isSelected(item)">
+              + Select
+            </span>
+
+            <span *ngIf="isSelected(item)">
+              ✓ Selected
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <!-- Product Content -->
+        <div class="product-content">
+
+          <div class="product-top">
+
+            <div>
+
+              <p class="product-brand">
+                {{ item.brand || 'Independent' }}
+              </p>
+
+              <h3>
+                {{ item.title }}
+              </h3>
+
+            </div>
+
+            <span
+              *ngIf="item.size"
+              class="size-badge">
+
+              {{ item.size }}
+
+            </span>
+
+          </div>
+
+
+          <p
+            *ngIf="item.description"
+            class="product-description">
+
+            {{ item.description }}
+
+          </p>
+
+
+          <div class="product-meta">
+
+            <div>
+
+              <span class="meta-label">
+                SWAP VALUE
+              </span>
+
+              <strong>
+                {{ item.estimatedValue || 0 }}
+                <small>PTS</small>
+              </strong>
+
+            </div>
+
+            <div
+              *ngIf="item.location"
+              class="location">
+
+              <span>⌖</span>
+              {{ item.location }}
+
+            </div>
+
+          </div>
+
+
+          <!-- Product Actions -->
+<div class="product-actions">
+
+  <a
+    [routerLink]="['/item', item._id]"
+    class="view-button"
+    (click)="$event.stopPropagation()">
+
+    View Details
+    <span>&#9881;</span>
+
+  </a>
+
+  <button
+    type="button"
+    class="swap-button"
+    [class.active]="isSelected(item)"
+    (click)="$event.stopPropagation(); selectItem(item)">
+
+    <span *ngIf="!isSelected(item)">
+      Select
+    </span>
+
+    <span *ngIf="isSelected(item)">
+      Selected ✓
+    </span>
+
+  </button>
+
+</div>
+
+<!-- External Brand / Product Search -->
+
+<button
+  type="button"
+  class="brand-search-button"
+  (click)="$event.stopPropagation(); searchBrandProduct(item)">
+
+  <span>🔎</span>
+
+  <span>
+    Search Brand / Product
+  </span>
+
+  <span class="external-arrow">
+    ↗
+  </span>
+
+</button>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- Empty -->
+    <section
+      *ngIf="!loading && !errorMessage && filteredItems.length === 0"
+      class="empty-state">
+
+      <div class="empty-symbol">
+        ◇
+      </div>
+
+      <div class="section-eyebrow">
+        NO MATCHES
+      </div>
+
+      <h2>
+        Nothing matched your style
+      </h2>
+
+      <p>
+        Try changing your filters or search for something different.
+      </p>
+
+      <button
+        type="button"
+        class="primary-action"
+        (click)="clearFilters()">
+
+        Reset Filters
+        <span>&#9881;</span>
+
+      </button>
+
+    </section>
+    <!-- Bottom Trust -->
+    <section class="trust-section">
+
+      <div>
+        <span class="trust-icon">✓</span>
+        Verified listings
+      </div>
+
+      <div>
+        <span class="trust-icon">↔</span>
+        Easy clothing exchange
+      </div>
+
+      <div>
+        <span class="trust-icon">♻</span>
+        Sustainable fashion
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+

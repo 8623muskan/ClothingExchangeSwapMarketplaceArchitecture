@@ -1,0 +1,550 @@
+<div class="admin-page">
+
+  <div class="admin-container">
+
+    <!-- HEADER -->
+    <header class="admin-header">
+
+      <div>
+
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          CLOTHING EXCHANGE
+        </div>
+
+        <h1>
+          Admin Moderation Panel
+        </h1>
+
+        <p>
+          Monitor marketplace listings and review published clothing items.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadListings()"
+        [disabled]="loading"
+      >
+        <span
+          class="refresh-icon"
+          [class.refreshing]="loading"
+        >
+          ↻
+        </span>
+
+        {{ loading ? 'Refreshing...' : 'Refresh' }}
+      </button>
+
+    </header>
+
+
+    <!-- SUMMARY -->
+    <section class="summary-grid">
+
+      <div class="summary-card">
+
+        <div class="summary-icon total">
+          #
+        </div>
+
+        <div>
+          <span>Total Listings</span>
+          <strong>
+            {{ listings.length }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <div class="summary-icon active">
+          ✓
+        </div>
+
+        <div>
+          <span>Active Listings</span>
+          <strong>
+            {{ getActiveCount() }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <div class="summary-icon category">
+          ◈
+        </div>
+
+        <div>
+          <span>Categories</span>
+          <strong>
+            {{ getCategories().length }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <div class="summary-icon visible">
+          ◉
+        </div>
+
+        <div>
+          <span>Currently Shown</span>
+          <strong>
+            {{ filteredListings.length }}
+          </strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ERROR -->
+    <section
+      *ngIf="errorMessage"
+      class="error-card"
+    >
+
+      <div class="error-icon">
+        !
+      </div>
+
+      <div>
+        <h2>
+          Unable to load listings
+        </h2>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        (click)="loadListings()"
+      >
+        Try Again
+      </button>
+
+    </section>
+
+
+    <!-- FILTERS -->
+    <section
+      *ngIf="!loading && !errorMessage"
+      class="filter-card"
+    >
+
+      <div class="filter-field search-field">
+
+        <label for="adminSearch">
+          Search listings
+        </label>
+
+        <div class="input-wrapper">
+
+          <span class="input-icon">
+            ⌕
+          </span>
+
+          <input
+            id="adminSearch"
+            type="text"
+            [value]="searchTerm"
+            (input)="onSearchChange($any($event.target).value)"
+            placeholder="Search title, brand, category, location..."
+          />
+
+        </div>
+
+      </div>
+
+
+      <div class="filter-field">
+
+        <label for="adminCategory">
+          Category
+        </label>
+
+        <select
+          id="adminCategory"
+          [value]="selectedCategory"
+          (change)="onCategoryChange($any($event.target).value)"
+        >
+
+          <option value="all">
+            All categories
+          </option>
+
+          <option
+            *ngFor="let category of getCategories()"
+            [value]="category"
+          >
+            {{ category }}
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <button
+        *ngIf="
+          searchTerm ||
+          selectedCategory !== 'all'
+        "
+        type="button"
+        class="clear-button"
+        (click)="clearFilters()"
+      >
+        Clear filters
+      </button>
+
+    </section>
+
+
+    <!-- LOADING -->
+    <section
+      *ngIf="loading"
+      class="state-card"
+    >
+
+      <div class="loading-spinner"></div>
+
+      <h2>
+        Loading marketplace
+      </h2>
+
+      <p>
+        Fetching clothing listings...
+      </p>
+
+    </section>
+
+
+    <!-- EMPTY -->
+    <section
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        filteredListings.length === 0
+      "
+      class="state-card"
+    >
+
+      <div class="empty-icon">
+        ◌
+      </div>
+
+      <h2>
+        No listings found
+      </h2>
+
+      <p>
+        {{
+          listings.length === 0
+            ? 'There are currently no marketplace listings.'
+            : 'No listings match your current filters.'
+        }}
+      </p>
+
+      <button
+        *ngIf="
+          searchTerm ||
+          selectedCategory !== 'all'
+        "
+        type="button"
+        class="clear-button state-button"
+        (click)="clearFilters()"
+      >
+        Clear filters
+      </button>
+
+    </section>
+
+
+    <!-- LISTINGS -->
+    <section
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        filteredListings.length > 0
+      "
+      class="listings-card"
+    >
+
+      <div class="listings-header">
+
+        <div>
+
+          <h2>
+            Marketplace Listings
+          </h2>
+
+          <p>
+            Review currently published clothing items.
+          </p>
+
+        </div>
+
+        <span class="listing-count">
+          {{ filteredListings.length }}
+          {{ filteredListings.length === 1 ? 'listing' : 'listings' }}
+        </span>
+
+      </div>
+
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Item
+              </th>
+
+              <th>
+                Category
+              </th>
+
+              <th>
+                Brand
+              </th>
+
+              <th>
+                Condition
+              </th>
+
+              <th>
+                Location
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Listed
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr
+              *ngFor="
+                let item of filteredListings;
+                trackBy: trackByItemId
+              "
+            >
+
+              <!-- ITEM -->
+              <td>
+
+                <div class="item-cell">
+
+                  <div class="item-image">
+
+                    <img
+                      [src]="getImageUrl(item.imageUrl)"
+                      [alt]="item.title || 'Clothing item'"
+                      (error)="onImageError($event)"
+                    />
+
+                  </div>
+
+                  <div class="item-details">
+
+                    <strong>
+                      {{ item.title || 'Untitled item' }}
+                    </strong>
+
+                    <span>
+                      {{
+                        item.gender ||
+                        'Gender not specified'
+                      }}
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </td>
+
+
+              <!-- CATEGORY -->
+              <td>
+
+                <span class="category-pill">
+                  {{ item.category || 'Uncategorized' }}
+                </span>
+
+              </td>
+
+
+              <!-- BRAND -->
+              <td>
+
+                <span class="table-text">
+                  {{ item.brand || '—' }}
+                </span>
+
+              </td>
+
+
+              <!-- CONDITION -->
+              <td>
+
+                <span class="condition-text">
+                  {{ item.condition || '—' }}
+                </span>
+
+              </td>
+
+
+              <!-- LOCATION -->
+              <td>
+
+                <span class="location-text">
+                  {{ item.location || '—' }}
+                </span>
+
+              </td>
+
+
+              <!-- STATUS -->
+              <td>
+
+                <span
+                  class="status-pill"
+                  [ngClass]="getStatusClass(item)"
+                >
+
+                  <span class="status-dot"></span>
+
+                  {{ getStatusLabel(item) }}
+
+                </span>
+
+              </td>
+
+
+              <!-- DATE -->
+              <td>
+
+                <span class="date-text">
+                  {{ formatDate(item.createdAt) || '—' }}
+                </span>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- CATEGORY OVERVIEW -->
+    <section
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        listings.length > 0
+      "
+      class="category-card"
+    >
+
+      <div class="category-header">
+
+        <div>
+          <h2>
+            Category Overview
+          </h2>
+
+          <p>
+            Distribution of marketplace listings.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="category-grid">
+
+        <div
+          *ngFor="let category of getCategories()"
+          class="category-overview-item"
+        >
+
+          <div class="category-overview-top">
+
+            <strong>
+              {{ category }}
+            </strong>
+
+            <span>
+              {{ getCategoryCount(category) }}
+            </span>
+
+          </div>
+
+          <div class="category-bar">
+
+            <div
+              class="category-bar-fill"
+              [style.width.%]="
+                listings.length
+                  ? (getCategoryCount(category) / listings.length) * 100
+                  : 0
+              "
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- FOOTER NOTE -->
+    <div class="admin-note">
+
+      <span>
+        Admin view uses the existing marketplace listing API.
+      </span>
+
+      <span>
+        Listing moderation actions can be connected when an admin-specific backend API is added.
+      </span>
+
+    </div>
+
+  </div>
+
+</div>

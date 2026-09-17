@@ -1,0 +1,774 @@
+﻿import { CommonModule } from '@angular/common';
+import {
+  Component,
+  OnInit,
+  signal
+} from '@angular/core';
+import {
+  ActivatedRoute,
+  Router
+} from '@angular/router';
+import { ItemService } from '../../services/item';
+
+@Component({
+  selector: 'app-item-detail',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <main class="item-detail-page">
+
+      <button
+        type="button"
+        class="back-button"
+        (click)="goBack()"
+      >
+         ← Back to Marketplace
+      </button>
+
+      <!-- Error -->
+      <section
+        *ngIf="errorMessage() && !item()"
+        class="state error"
+      >
+        <p>{{ errorMessage() }}</p>
+
+        <button
+          type="button"
+          class="back-action"
+          (click)="goBack()"
+        >
+          Back to Marketplace
+        </button>
+      </section>
+
+      <!-- Item -->
+      <section
+        *ngIf="item()"
+        class="item-detail-card"
+      >
+
+        <!-- Image -->
+        <div class="image-section">
+
+          <img
+            [src]="getImageUrl(item().imageUrl)"
+            [alt]="item().title || 'Clothing item'"
+            (error)="onImageError($event)"
+          />
+
+        </div>
+
+        <!-- Content -->
+        <div class="content-section">
+
+          <span class="status">
+            Available
+          </span>
+
+          <h1>
+            {{ item().title || 'Untitled Item' }}
+          </h1>
+
+          <p class="description">
+            {{
+              item().description ||
+              'No description available.'
+            }}
+          </p>
+
+          <div class="details">
+
+            <div>
+              <strong>Category</strong>
+              <span>
+                {{ item().category || 'N/A' }}
+              </span>
+            </div>
+
+            <div>
+              <strong>Size</strong>
+              <span>
+                {{ item().size || 'N/A' }}
+              </span>
+            </div>
+
+            <div>
+              <strong>Brand</strong>
+              <span>
+                {{ item().brand || 'N/A' }}
+              </span>
+            </div>
+
+            <div>
+              <strong>Condition</strong>
+              <span>
+                {{ item().condition || 'N/A' }}
+              </span>
+            </div>
+
+            <div>
+              <strong>Gender</strong>
+              <span>
+                {{ item().gender || 'Unisex' }}
+              </span>
+            </div>
+
+            <div>
+              <strong>Color</strong>
+              <span>
+                {{ item().color || 'N/A' }}
+              </span>
+            </div>
+
+            <div>
+              <strong>Location</strong>
+              <span>
+                {{ item().location || 'N/A' }}
+              </span>
+            </div>
+
+            <div>
+              <strong>Estimated Value</strong>
+              <span>
+                ₹{{ item().estimatedValue || 0 }}
+              </span>
+            </div>
+
+          </div>
+
+          <!-- Brand -->
+          <div
+            class="brand-website"
+            *ngIf="item().brandWebsite"
+          >
+
+            <div class="brand-info">
+
+              <strong>
+                Official Brand Website
+              </strong>
+
+              <span>
+                {{ item().brand || 'Brand' }}
+              </span>
+
+            </div>
+
+            <button
+              type="button"
+              class="website-button"
+              (click)="visitBrandWebsite()"
+            >
+              Visit Official Website ?
+            </button>
+
+          </div>
+
+          <!-- Owner -->
+          <div
+            class="owner"
+            *ngIf="item().owner"
+          >
+
+            <strong>
+              Listed by
+            </strong>
+
+            <span>
+              {{
+                item().owner.name ||
+                item().owner.username ||
+                item().owner.email ||
+                'User'
+              }}
+            </span>
+
+          </div>
+
+          <!-- Swap -->
+          <button
+            type="button"
+            class="primary-button"
+            (click)="requestSwap()"
+          >
+            Request Swap
+          </button>
+
+        </div>
+
+      </section>
+
+    </main>
+  `,
+
+  styles: [`
+    :host {
+      display: block;
+    }
+
+    .item-detail-page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    .back-button {
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      font-size: 15px;
+      margin-bottom: 24px;
+      padding: 8px 0;
+      color: #374151;
+      font-weight: 600;
+    }
+
+    .back-button:hover {
+      color: #111827;
+    }
+
+    .state {
+      padding: 80px 20px;
+      text-align: center;
+      font-size: 18px;
+      color: #4b5563;
+    }
+
+    .error {
+      color: #b42318;
+    }
+
+    .back-action {
+      margin-top: 20px;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 20px;
+      background: #111827;
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .back-action:hover {
+      background: #374151;
+    }
+
+    .item-detail-card {
+      display: grid;
+      grid-template-columns:
+        minmax(320px, 1fr)
+        minmax(320px, 1fr);
+
+      gap: 40px;
+
+      background: #ffffff;
+
+      border-radius: 20px;
+
+      padding: 28px;
+
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .image-section {
+      min-height: 500px;
+
+      border-radius: 16px;
+
+      overflow: hidden;
+
+      background: #f3f4f6;
+    }
+
+    .image-section img {
+      width: 100%;
+
+      height: 100%;
+
+      min-height: 500px;
+
+      object-fit: cover;
+
+      display: block;
+    }
+
+    .content-section {
+      display: flex;
+
+      flex-direction: column;
+
+      justify-content: center;
+    }
+
+    .status {
+      display: inline-flex;
+
+      width: fit-content;
+
+      padding: 6px 12px;
+
+      border-radius: 999px;
+
+      background: #e8f7ee;
+
+      color: #147a3d;
+
+      font-size: 13px;
+
+      font-weight: 700;
+
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+
+      font-size: 38px;
+
+      line-height: 1.1;
+
+      color: #111827;
+    }
+
+    .description {
+      color: #555555;
+
+      line-height: 1.7;
+
+      margin-bottom: 28px;
+    }
+
+    .details {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap: 16px;
+
+      margin-bottom: 24px;
+    }
+
+    .details div {
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 4px;
+
+      padding: 14px;
+
+      border-radius: 12px;
+
+      background: #f7f7f8;
+    }
+
+    .details strong,
+    .owner strong,
+    .brand-info strong {
+      font-size: 12px;
+
+      text-transform: uppercase;
+
+      letter-spacing: 0.04em;
+
+      color: #777777;
+    }
+
+    .details span,
+    .owner span,
+    .brand-info span {
+      font-size: 15px;
+
+      color: #222222;
+    }
+
+    .brand-website {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      gap: 16px;
+
+      padding: 16px;
+
+      margin-bottom: 24px;
+
+      border: 1px solid #e5e7eb;
+
+      border-radius: 14px;
+
+      background: #fafafa;
+    }
+
+    .brand-info {
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 5px;
+    }
+
+    .website-button {
+      flex-shrink: 0;
+
+      border: 0;
+
+      border-radius: 10px;
+
+      padding: 11px 16px;
+
+      background: #111827;
+
+      color: #ffffff;
+
+      cursor: pointer;
+
+      font-size: 14px;
+
+      font-weight: 700;
+    }
+
+    .website-button:hover {
+      background: #374151;
+    }
+
+    .owner {
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 5px;
+
+      margin-bottom: 24px;
+    }
+
+    .primary-button {
+      width: 100%;
+
+      border: 0;
+
+      border-radius: 12px;
+
+      padding: 15px 20px;
+
+      background: #111827;
+
+      color: #ffffff;
+
+      cursor: pointer;
+
+      font-size: 16px;
+
+      font-weight: 700;
+    }
+
+    .primary-button:hover {
+      background: #374151;
+    }
+
+    @media (max-width: 800px) {
+
+      .item-detail-card {
+        grid-template-columns: 1fr;
+      }
+
+      .image-section,
+      .image-section img {
+        min-height: 350px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+
+      .details {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-website {
+        align-items: stretch;
+
+        flex-direction: column;
+      }
+
+      .website-button {
+        width: 100%;
+      }
+    }
+  `]
+})
+export class ItemDetailComponent implements OnInit {
+
+  /*
+   * Signals are used here because they reliably trigger
+   * Angular template updates when the HTTP response arrives.
+   */
+  readonly item = signal<any | null>(null);
+
+  readonly errorMessage = signal('');
+
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly itemService: ItemService
+  ) {}
+
+  ngOnInit(): void {
+
+    const itemId =
+      this.route.snapshot.paramMap.get('id');
+
+    if (!itemId) {
+
+      this.errorMessage.set(
+        'Item ID is missing.'
+      );
+
+      return;
+    }
+
+    console.log(
+      'ITEM DETAIL ID:',
+      itemId
+    );
+
+    this.loadItem(itemId);
+  }
+
+  private loadItem(
+    itemId: string
+  ): void {
+
+    this.errorMessage.set('');
+
+    this.itemService
+      .getItemById(itemId)
+      .subscribe({
+
+        next: (response: any) => {
+
+          console.log(
+            'ITEM DETAIL RESPONSE:',
+            response
+          );
+
+          const receivedItem =
+            response?.data ??
+            response ??
+            null;
+
+          console.log(
+            'ITEM DETAIL ITEM:',
+            receivedItem
+          );
+
+          if (!receivedItem) {
+
+            this.item.set(null);
+
+            this.errorMessage.set(
+              'Clothing item not found.'
+            );
+
+            return;
+          }
+
+          this.item.set(
+            receivedItem
+          );
+
+          this.errorMessage.set('');
+
+          console.log(
+            'ITEM DETAIL SIGNAL UPDATED:',
+            this.item()
+          );
+
+        },
+
+        error: (error: any) => {
+
+          console.error(
+            'ITEM DETAIL LOAD ERROR:',
+            error
+          );
+
+          this.item.set(null);
+
+          this.errorMessage.set(
+            error?.error?.message ||
+            'Unable to load clothing item.'
+          );
+
+        }
+
+      });
+  }
+
+  getImageUrl(
+    imageUrl: string |
+      null |
+      undefined
+  ): string {
+
+    if (
+      !imageUrl ||
+      !String(imageUrl).trim()
+    ) {
+
+      return 'assets/images/placeholder-clothing.svg';
+
+    }
+
+    const value =
+      String(imageUrl).trim();
+
+    if (
+      /^https?:\/\//i.test(value)
+    ) {
+
+      return value;
+
+    }
+
+    if (
+      value.startsWith('/')
+    ) {
+
+      return `http://127.0.0.1:5000${value}`;
+
+    }
+
+    return `http://127.0.0.1:5000/${value}`;
+  }
+
+  onImageError(
+    event: Event
+  ): void {
+
+    const image =
+      event.target as HTMLImageElement;
+
+    if (
+      image.dataset['fallback']
+    ) {
+
+      return;
+
+    }
+
+    image.dataset['fallback'] =
+      'true';
+
+    image.src =
+      'assets/images/placeholder-clothing.svg';
+  }
+
+  visitBrandWebsite(): void {
+
+    const currentItem =
+      this.item();
+
+    if (
+      !currentItem?.brandWebsite
+    ) {
+
+      return;
+
+    }
+
+    let website =
+      String(
+        currentItem.brandWebsite
+      ).trim();
+
+    if (!website) {
+
+      return;
+
+    }
+
+    if (
+      !/^https?:\/\//i.test(website)
+    ) {
+
+      website =
+        `https://${website}`;
+
+    }
+
+    try {
+
+      const url =
+        new URL(website);
+
+      if (
+        url.protocol !== 'http:' &&
+        url.protocol !== 'https:'
+      ) {
+
+        return;
+
+      }
+
+      window.open(
+        url.toString(),
+        '_blank',
+        'noopener,noreferrer'
+      );
+
+    } catch (error) {
+
+      console.error(
+        'BRAND WEBSITE: Invalid URL',
+        error
+      );
+
+    }
+  }
+
+  requestSwap(): void {
+
+    const currentItem =
+      this.item();
+
+    if (
+      !currentItem?._id
+    ) {
+
+      console.error(
+        'Cannot request swap: item ID missing.'
+      );
+
+      return;
+
+    }
+
+    console.log(
+      'Swap requested for item:',
+      currentItem._id
+    );
+
+    this.router.navigate(
+      ['/swap/request'],
+      {
+        queryParams: {
+          itemId: currentItem._id
+        }
+      }
+    );
+  }
+
+  goBack(): void {
+
+    this.router.navigate([
+      '/marketplace'
+    ]);
+
+  }
+}
+

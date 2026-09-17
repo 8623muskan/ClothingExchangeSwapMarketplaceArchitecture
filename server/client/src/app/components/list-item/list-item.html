@@ -1,0 +1,663 @@
+<div class="list-page">
+
+  <div class="list-card">
+
+    <!-- HEADER -->
+    <header class="page-header">
+
+      <button
+        type="button"
+        class="back-button"
+        (click)="router.navigate(['/marketplace'])"
+      >
+        <span class="back-arrow">←</span>
+        <span>Back to Marketplace</span>
+      </button>
+
+      <div class="header-content">
+
+        <div class="header-badge">
+          <span class="badge-dot"></span>
+          CLOTHING EXCHANGE
+        </div>
+
+        <h1>List Your Clothing</h1>
+
+        <p class="subtitle">
+          Give your clothing a new home. Add the details below so others
+          can discover and exchange your item.
+        </p>
+
+        <div class="header-benefits">
+          <span>
+            <span class="benefit-icon">✓</span>
+            Easy to list
+          </span>
+
+          <span>
+            <span class="benefit-icon">↔</span>
+            Swap with others
+          </span>
+
+          <span>
+            <span class="benefit-icon">♡</span>
+            Give it a new home
+          </span>
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- FORM -->
+    <form
+      [formGroup]="listingForm"
+      (ngSubmit)="submitListing()"
+      novalidate
+    >
+
+      <!-- ========================================= -->
+      <!-- ITEM PHOTO -->
+      <!-- ========================================= -->
+
+      <section class="form-section photo-section">
+
+        <div class="section-heading">
+
+          <div class="section-title-wrapper">
+
+            <div class="section-number">
+              01
+            </div>
+
+            <div>
+              <h2>Item Photo</h2>
+
+              <p>
+                Add a clear photo of the clothing item.
+              </p>
+            </div>
+
+          </div>
+
+          <span class="required-badge">
+            Required
+          </span>
+
+        </div>
+
+
+        <!-- IMAGE PREVIEW -->
+        <div
+          class="image-preview"
+          *ngIf="imagePreview; else imagePlaceholder"
+        >
+
+          <div class="preview-image-wrapper">
+
+            <img
+              [src]="imagePreview"
+              alt="Clothing preview"
+            />
+
+            <div class="preview-overlay">
+
+              <button
+                type="button"
+                class="change-photo-button"
+                (click)="removeImage()"
+              >
+                <span>↻</span>
+                Change Photo
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="preview-info">
+
+            <div>
+              <strong>Photo selected</strong>
+
+              <span>
+                Your clothing photo is ready to upload.
+              </span>
+            </div>
+
+            <button
+              type="button"
+              class="remove-image"
+              (click)="removeImage()"
+            >
+              Remove
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- UPLOAD PLACEHOLDER -->
+        <ng-template #imagePlaceholder>
+
+          <label
+            class="upload-box"
+            for="clothingImage"
+          >
+
+            <div class="upload-icon-wrapper">
+              <span class="upload-icon">+</span>
+            </div>
+
+            <strong>
+              Upload clothing photo
+            </strong>
+
+            <span class="upload-description">
+              Click anywhere here to choose an image
+            </span>
+
+            <small>
+              JPG, JPEG, PNG or WEBP
+              <span class="separator">•</span>
+              Maximum 5 MB
+            </small>
+
+            <div class="upload-hint">
+              A clear front-facing photo helps others decide faster.
+            </div>
+
+          </label>
+
+        </ng-template>
+
+
+        <input
+          id="clothingImage"
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp"
+          hidden
+          (change)="onFileSelected($event)"
+        />
+
+      </section>
+
+
+      <!-- ========================================= -->
+      <!-- BASIC INFORMATION -->
+      <!-- ========================================= -->
+
+      <section class="form-section">
+
+        <div class="section-heading">
+
+          <div class="section-title-wrapper">
+
+            <div class="section-number">
+              02
+            </div>
+
+            <div>
+              <h2>Basic Information</h2>
+
+              <p>
+                Tell people what you are offering.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-grid">
+
+          <!-- TITLE -->
+          <div class="field full">
+
+            <label for="title">
+              Item Title
+              <span class="required">*</span>
+            </label>
+
+            <div class="input-wrapper">
+
+              <input
+                id="title"
+                type="text"
+                formControlName="title"
+                placeholder="Example: Blue Denim Jacket"
+              />
+
+            </div>
+
+            <small
+              class="error"
+              *ngIf="title?.touched && title?.invalid"
+            >
+              Item title is required.
+            </small>
+
+          </div>
+
+
+          <!-- DESCRIPTION -->
+          <div class="field full">
+
+            <label for="description">
+              Description
+            </label>
+
+            <textarea
+              id="description"
+              rows="5"
+              formControlName="description"
+              placeholder="Describe the fit, material, style, condition, or anything useful for another user..."
+            ></textarea>
+
+            <div class="field-bottom-row">
+
+              <small class="hint">
+                A detailed description helps other users decide faster.
+              </small>
+
+              <small class="character-limit">
+                Up to 2000 characters
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <!-- CATEGORY -->
+          <div class="field">
+
+            <label for="category">
+              Category
+              <span class="required">*</span>
+            </label>
+
+            <select
+              id="category"
+              formControlName="category"
+            >
+
+              <option value="">
+                Select category
+              </option>
+
+              <option
+                *ngFor="let category of categories"
+                [value]="category"
+              >
+                {{ category }}
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- SIZE -->
+          <div class="field">
+
+            <label for="size">
+              Size
+              <span class="required">*</span>
+            </label>
+
+            <select
+              id="size"
+              formControlName="size"
+            >
+
+              <option value="">
+                Select size
+              </option>
+
+              <option
+                *ngFor="let size of sizes"
+                [value]="size"
+              >
+                {{ size }}
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ========================================= -->
+      <!-- ITEM DETAILS -->
+      <!-- ========================================= -->
+
+      <section class="form-section">
+
+        <div class="section-heading">
+
+          <div class="section-title-wrapper">
+
+            <div class="section-number">
+              03
+            </div>
+
+            <div>
+              <h2>Item Details</h2>
+
+              <p>
+                Add information that helps users understand your item.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-grid">
+
+          <!-- GENDER -->
+          <div class="field">
+
+            <label for="gender">
+              Gender
+              <span class="required">*</span>
+            </label>
+
+            <select
+              id="gender"
+              formControlName="gender"
+            >
+
+              <option
+                *ngFor="let gender of genders"
+                [value]="gender"
+              >
+                {{ gender }}
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- CONDITION -->
+          <div class="field">
+
+            <label for="condition">
+              Condition
+              <span class="required">*</span>
+            </label>
+
+            <select
+              id="condition"
+              formControlName="condition"
+            >
+
+              <option
+                *ngFor="let condition of conditions"
+                [value]="condition"
+              >
+                {{ condition }}
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- BRAND -->
+          <div class="field">
+
+            <label for="brand">
+              Brand
+              <span class="optional">Optional</span>
+            </label>
+
+            <input
+              id="brand"
+              type="text"
+              formControlName="brand"
+              placeholder="Example: Zara, Nike, H&M"
+            />
+
+          </div>
+
+
+          <!-- COLOR -->
+          <div class="field">
+
+            <label for="color">
+              Color
+              <span class="optional">Optional</span>
+            </label>
+
+            <input
+              id="color"
+              type="text"
+              formControlName="color"
+              placeholder="Example: Black"
+            />
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ========================================= -->
+      <!-- VALUE & LOCATION -->
+      <!-- ========================================= -->
+
+      <section class="form-section">
+
+        <div class="section-heading">
+
+          <div class="section-title-wrapper">
+
+            <div class="section-number">
+              04
+            </div>
+
+            <div>
+              <h2>Value & Location</h2>
+
+              <p>
+                Help users understand the item's value and availability.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-grid">
+
+          <!-- LOCATION -->
+          <div class="field">
+
+            <label for="location">
+              Location
+              <span class="required">*</span>
+            </label>
+
+            <input
+              id="location"
+              type="text"
+              formControlName="location"
+              placeholder="Example: Mumbai"
+            />
+
+            <small
+              class="error"
+              *ngIf="location?.touched && location?.invalid"
+            >
+              Location is required.
+            </small>
+
+          </div>
+
+
+          <!-- VALUE -->
+          <div class="field">
+
+            <label for="estimatedValue">
+              Estimated Value
+              <span class="optional">Optional</span>
+            </label>
+
+            <div class="currency-input">
+
+              <span class="currency-symbol">₹</span>
+
+              <input
+                id="estimatedValue"
+                type="number"
+                min="0"
+                formControlName="estimatedValue"
+                placeholder="500"
+              />
+
+            </div>
+
+            <small class="hint">
+              Approximate original or current value.
+            </small>
+
+          </div>
+
+
+          <!-- BRAND WEBSITE -->
+          <div class="field full">
+
+            <label for="brandWebsite">
+              Brand / Product Website
+              <span class="optional">Optional</span>
+            </label>
+
+            <input
+              id="brandWebsite"
+              type="url"
+              formControlName="brandWebsite"
+              placeholder="https://www.example.com/product"
+            />
+
+            <small class="hint">
+              Add the original product or official brand page.
+              Users can visit it from the marketplace.
+            </small>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ========================================= -->
+      <!-- MESSAGES -->
+      <!-- ========================================= -->
+
+      <div
+        class="message success"
+        *ngIf="successMessage"
+      >
+        <span class="message-icon">✓</span>
+
+        <span>
+          {{ successMessage }}
+        </span>
+      </div>
+
+
+      <div
+        class="message error-message"
+        *ngIf="errorMessage"
+      >
+        <span class="message-icon">!</span>
+
+        <span>
+          {{ errorMessage }}
+        </span>
+      </div>
+
+
+      <!-- ========================================= -->
+      <!-- FOOTER -->
+      <!-- ========================================= -->
+
+      <div class="form-footer">
+
+        <div class="footer-note">
+
+          <div class="footer-note-icon">
+            ✓
+          </div>
+
+          <div>
+            <strong>
+              Ready to exchange?
+            </strong>
+
+            <span>
+              Your listing will be visible in the marketplace.
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="footer-actions">
+
+          <button
+            type="button"
+            class="cancel-button"
+            [disabled]="isSubmitting"
+            (click)="router.navigate(['/marketplace'])"
+          >
+            Cancel
+          </button>
+
+
+          <button
+            type="submit"
+            class="submit-button"
+            [disabled]="isSubmitting"
+          >
+
+            <span
+              *ngIf="!isSubmitting"
+              class="submit-content"
+            >
+              <span>List Clothing Item</span>
+              <span class="submit-arrow">→</span>
+            </span>
+
+            <span
+              *ngIf="isSubmitting"
+              class="submit-content"
+            >
+              <span class="loading-spinner"></span>
+              <span>Creating Listing...</span>
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

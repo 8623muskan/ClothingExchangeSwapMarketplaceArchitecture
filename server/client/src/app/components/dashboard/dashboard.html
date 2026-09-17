@@ -1,0 +1,538 @@
+<div class="dashboard-page">
+
+  <div class="dashboard-container">
+
+    <!-- HEADER -->
+    <header class="dashboard-header">
+
+      <div>
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          CLOTHING EXCHANGE
+        </div>
+
+        <h1>
+          My Swap Dashboard
+        </h1>
+
+        <p>
+          Track your sent and received clothing swap requests.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadUserSwaps()"
+        [disabled]="loading"
+      >
+        <span
+          class="refresh-icon"
+          [class.refreshing]="loading"
+        >
+          ↻
+        </span>
+
+        {{ loading ? 'Refreshing...' : 'Refresh' }}
+      </button>
+
+    </header>
+
+
+    <!-- SUMMARY -->
+    <section
+      *ngIf="!loading && !errorMessage"
+      class="summary-grid"
+    >
+
+      <div class="summary-card">
+
+        <div class="summary-icon pending">
+          ⏳
+        </div>
+
+        <div>
+          <span>Pending</span>
+          <strong>
+            {{ getPendingCount() }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <div class="summary-icon accepted">
+          ✓
+        </div>
+
+        <div>
+          <span>Accepted</span>
+          <strong>
+            {{ getAcceptedCount() }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <div class="summary-icon completed">
+          ↔
+        </div>
+
+        <div>
+          <span>Completed</span>
+          <strong>
+            {{ getCompletedCount() }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <div class="summary-icon total">
+          #
+        </div>
+
+        <div>
+          <span>Total Requests</span>
+          <strong>
+            {{ swaps.length }}
+          </strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ERROR -->
+    <section
+      *ngIf="errorMessage"
+      class="error-card"
+    >
+
+      <div class="error-icon">
+        !
+      </div>
+
+      <div>
+
+        <h2>
+          Unable to load dashboard
+        </h2>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        (click)="loadUserSwaps()"
+      >
+        Try Again
+      </button>
+
+    </section>
+
+
+    <!-- LOADING -->
+    <section
+      *ngIf="loading"
+      class="loading-card"
+    >
+
+      <div class="loading-spinner"></div>
+
+      <h2>
+        Loading your swaps
+      </h2>
+
+      <p>
+        Getting your latest swap requests...
+      </p>
+
+    </section>
+
+
+    <!-- EMPTY -->
+    <section
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        swaps.length === 0
+      "
+      class="empty-card"
+    >
+
+      <div class="empty-icon">
+        ↔
+      </div>
+
+      <h2>
+        No swap requests yet
+      </h2>
+
+      <p>
+        Browse the marketplace and request a swap
+        to see your activity here.
+      </p>
+
+      <a
+        routerLink="/marketplace"
+        class="marketplace-button"
+      >
+        Browse Marketplace
+        <span>→</span>
+      </a>
+
+    </section>
+
+
+    <!-- SWAPS -->
+    <section
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        swaps.length > 0
+      "
+      class="requests-section"
+    >
+
+      <div class="section-heading">
+
+        <div>
+          <h2>
+            Swap Requests
+          </h2>
+
+          <p>
+            Your latest exchange activity.
+          </p>
+        </div>
+
+        <span class="request-count">
+          {{ swaps.length }}
+          {{ swaps.length === 1 ? 'request' : 'requests' }}
+        </span>
+
+      </div>
+
+
+      <!-- REQUEST LIST -->
+      <div class="requests-list">
+
+        <article
+          *ngFor="
+            let swap of swaps;
+            trackBy: trackBySwapId
+          "
+          class="swap-card"
+        >
+
+          <!-- CARD TOP -->
+          <div class="swap-card-top">
+
+            <div class="role-info">
+
+              <div class="user-avatar">
+                {{
+                  getOtherUserName(swap)
+                    .charAt(0)
+                    .toUpperCase()
+                }}
+              </div>
+
+              <div>
+
+                <span class="role-label">
+                  {{ getRoleLabel(swap) }}
+                </span>
+
+                <strong>
+                  {{ getOtherUserName(swap) }}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <span
+              class="status-badge"
+              [ngClass]="getStatusClass(swap.status)"
+            >
+              <span class="status-dot"></span>
+              {{ getStatusLabel(swap.status) }}
+            </span>
+
+          </div>
+
+
+          <!-- ITEMS -->
+          <div class="swap-items">
+
+            <!-- REQUESTED -->
+            <div class="swap-item">
+
+              <div class="item-image">
+
+                <img
+                  [src]="getRequestedItemImage(swap)"
+                  [alt]="getRequestedItemTitle(swap)"
+                  (error)="onImageError($event)"
+                />
+
+                <span>
+                  YOU WANT
+                </span>
+
+              </div>
+
+              <div class="item-info">
+
+                <small>
+                  REQUESTED ITEM
+                </small>
+
+                <h3>
+                  {{ getRequestedItemTitle(swap) }}
+                </h3>
+
+                <p>
+                  {{ swap.requestedItem?.brand || 'No brand specified' }}
+                </p>
+
+                <div class="item-meta">
+
+                  <span
+                    *ngIf="swap.requestedItem?.size"
+                  >
+                    Size {{ swap.requestedItem.size }}
+                  </span>
+
+                  <span
+                    *ngIf="swap.requestedItem?.condition"
+                  >
+                    {{ swap.requestedItem.condition }}
+                  </span>
+
+                  <span
+                    *ngIf="swap.requestedItem?.color"
+                  >
+                    {{ swap.requestedItem.color }}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- ARROW -->
+            <div class="swap-arrow">
+              ↔
+            </div>
+
+
+            <!-- OFFERED -->
+            <div class="swap-item">
+
+              <div class="item-image">
+
+                <img
+                  [src]="getOfferedItemImage(swap)"
+                  [alt]="getOfferedItemTitle(swap)"
+                  (error)="onImageError($event)"
+                />
+
+                <span>
+                  YOU OFFER
+                </span>
+
+              </div>
+
+              <div class="item-info">
+
+                <small>
+                  OFFERED ITEM
+                </small>
+
+                <h3>
+                  {{ getOfferedItemTitle(swap) }}
+                </h3>
+
+                <p>
+                  {{ swap.offeredItem?.brand || 'No brand specified' }}
+                </p>
+
+                <div class="item-meta">
+
+                  <span
+                    *ngIf="swap.offeredItem?.size"
+                  >
+                    Size {{ swap.offeredItem.size }}
+                  </span>
+
+                  <span
+                    *ngIf="swap.offeredItem?.condition"
+                  >
+                    {{ swap.offeredItem.condition }}
+                  </span>
+
+                  <span
+                    *ngIf="swap.offeredItem?.color"
+                  >
+                    {{ swap.offeredItem.color }}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- MESSAGE -->
+          <div
+            *ngIf="swap.message"
+            class="swap-message"
+          >
+
+            <span class="message-label">
+              MESSAGE
+            </span>
+
+            <p>
+              "{{ swap.message }}"
+            </p>
+
+          </div>
+
+
+          <!-- DETAILS -->
+          <div class="swap-details">
+
+            <div>
+              <span>Requested</span>
+
+              <strong>
+                {{ formatDate(swap.createdAt) }}
+              </strong>
+
+              <small>
+                {{ formatTime(swap.createdAt) }}
+              </small>
+            </div>
+
+
+            <div>
+              <span>Swap ID</span>
+
+              <strong class="swap-id">
+                {{ swap._id }}
+              </strong>
+            </div>
+
+          </div>
+
+
+          <!-- ACTIONS -->
+          <div class="swap-actions">
+
+            <!-- CHAT -->
+            <a
+              [routerLink]="['/chat', swap._id]"
+              class="chat-button"
+            >
+              <span></span>
+              Open Chat
+            </a>
+
+
+            <!-- OWNER -->
+            <button
+              *ngIf="
+                isPending(swap.status) &&
+                isOwner(swap)
+              "
+              type="button"
+              class="accept-button"
+              (click)="acceptSwap(swap._id)"
+              [disabled]="updatingSwapId === swap._id"
+            >
+              <span>
+                {{
+                  updatingSwapId === swap._id
+                    ? 'Updating...'
+                    : 'Accept'
+                }}
+              </span>
+            </button>
+
+
+            <button
+              *ngIf="
+                isPending(swap.status) &&
+                isOwner(swap)
+              "
+              type="button"
+              class="reject-button"
+              (click)="rejectSwap(swap._id)"
+              [disabled]="updatingSwapId === swap._id"
+            >
+              Reject
+            </button>
+
+
+            <!-- REQUESTER -->
+            <button
+              *ngIf="
+                isPending(swap.status) &&
+                isRequester(swap)
+              "
+              type="button"
+              class="cancel-button"
+              (click)="cancelSwap(swap._id)"
+              [disabled]="updatingSwapId === swap._id"
+            >
+              Cancel
+            </button>
+
+
+            <!-- COMPLETE -->
+            <button
+              *ngIf="isAccepted(swap.status)"
+              type="button"
+              class="complete-button"
+              (click)="completeSwap(swap._id)"
+              [disabled]="updatingSwapId === swap._id"
+            >
+              {{
+                updatingSwapId === swap._id
+                  ? 'Updating...'
+                  : 'Mark Completed'
+              }}
+            </button>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</div>

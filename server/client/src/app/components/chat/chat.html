@@ -1,0 +1,458 @@
+<div
+  class="min-h-screen bg-[#f8f9fb] px-4 py-6 md:px-6 md:py-8"
+>
+  <div
+    class="max-w-5xl mx-auto"
+  >
+
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+
+    <div
+      class="mb-5"
+    >
+
+      <div
+        class="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+      >
+
+        <div>
+
+          <div
+            class="flex items-center gap-3 mb-1"
+          >
+
+            <div
+              class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-sm"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                class="w-5 h-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8 10h8M8 14h5"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19 4H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3l4 3 4-3h3a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"
+                />
+              </svg>
+            </div>
+
+            <div>
+
+              <h1
+                class="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight"
+              >
+                Swap Negotiation Chat
+              </h1>
+
+              <p
+                class="text-sm text-gray-500 mt-1"
+              >
+                Discuss swap terms, shipping, and exchange details.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Connection status -->
+
+        <div
+          class="inline-flex items-center gap-2 self-start md:self-auto px-3 py-2 rounded-full border bg-white shadow-sm"
+          [ngClass]="
+            socketConnected
+              ? 'border-green-200 text-green-700'
+              : 'border-gray-200 text-gray-500'
+          "
+        >
+
+          <span
+            class="w-2 h-2 rounded-full"
+            [ngClass]="
+              socketConnected
+                ? 'bg-green-500'
+                : 'bg-gray-400'
+            "
+          ></span>
+
+          <span
+            class="text-xs font-semibold"
+          >
+            {{
+              socketConnected
+                ? 'Connected'
+                : 'Connecting...'
+            }}
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================================================= -->
+    <!-- MAIN CHAT CARD -->
+    <!-- ================================================= -->
+
+    <div
+      class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
+    >
+
+      <!-- ================================================= -->
+      <!-- CHAT TOP BAR -->
+      <!-- ================================================= -->
+
+      <div
+        class="px-5 py-4 border-b border-gray-200 bg-white"
+      >
+
+        <div
+          class="flex items-center justify-between gap-4"
+        >
+
+          <div
+            class="flex items-center gap-3"
+          >
+
+            <div
+              class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold"
+            >
+              C
+            </div>
+
+            <div>
+
+              <p
+                class="text-sm font-bold text-gray-900"
+              >
+                Swap Conversation
+              </p>
+
+              <p
+                class="text-xs text-gray-500"
+              >
+                Private conversation for this swap
+              </p>
+
+            </div>
+
+          </div>
+
+          <div
+            class="hidden sm:block text-right"
+          >
+
+            <p
+              class="text-[11px] uppercase tracking-wide text-gray-400 font-semibold"
+            >
+              Swap ID
+            </p>
+
+            <p
+              class="text-xs font-mono text-gray-600 mt-1"
+            >
+              {{ swapId }}
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ================================================= -->
+      <!-- ERROR -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="historyError"
+        class="mx-5 mt-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-start gap-3"
+      >
+
+        <div
+          class="w-7 h-7 shrink-0 rounded-full bg-red-100 flex items-center justify-center font-bold text-red-600"
+        >
+          !
+        </div>
+
+        <div
+          class="pt-1"
+        >
+          {{ historyError }}
+        </div>
+
+      </div>
+
+      <!-- ================================================= -->
+      <!-- LOADING -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="loadingHistory"
+        class="flex flex-col items-center justify-center min-h-[420px] px-5"
+      >
+
+        <div
+          class="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"
+        ></div>
+
+        <p
+          class="mt-4 text-sm font-medium text-gray-600"
+        >
+          Loading conversation...
+        </p>
+
+        <p
+          class="mt-1 text-xs text-gray-400"
+        >
+          Fetching previous swap messages
+        </p>
+
+      </div>
+
+      <!-- ================================================= -->
+      <!-- MESSAGE AREA -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="!loadingHistory"
+        class="p-4 md:p-5"
+      >
+
+        <div
+          class="chat-message-container h-[52vh] min-h-[360px] max-h-[620px] overflow-y-auto rounded-xl border border-gray-200 bg-[#f8f9fb] px-3 py-4 md:px-5 md:py-5"
+        >
+
+          <!-- EMPTY -->
+          <div
+            *ngIf="messages.length === 0"
+            class="h-full flex items-center justify-center"
+          >
+
+            <div
+              class="text-center max-w-sm"
+            >
+
+              <div
+                class="mx-auto w-14 h-14 rounded-2xl bg-white border border-gray-200 shadow-sm flex items-center justify-center text-indigo-500"
+              >
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8 10h8M8 14h5"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19 4H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3l4 3 4-3h3a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"
+                  />
+                </svg>
+
+              </div>
+
+              <h2
+                class="mt-4 text-base font-bold text-gray-800"
+              >
+                Start your conversation
+              </h2>
+
+              <p
+                class="mt-1 text-sm text-gray-500 leading-6"
+              >
+                Discuss the clothing exchange, delivery details,
+                condition, or any other swap terms.
+              </p>
+
+            </div>
+
+          </div>
+
+          <!-- ================================================= -->
+          <!-- MESSAGES -->
+          <!-- ================================================= -->
+
+          <div
+            *ngFor="let msg of messages"
+            class="mb-3 flex"
+            [ngClass]="
+              msg.senderId === currentUserId
+                ? 'justify-end'
+                : 'justify-start'
+            "
+          >
+
+            <div
+              class="max-w-[82%] sm:max-w-[70%] md:max-w-[65%]"
+            >
+
+              <!-- RECEIVED / SENT LABEL -->
+              <div
+                class="flex items-center gap-2 mb-1.5"
+                [ngClass]="
+                  msg.senderId === currentUserId
+                    ? 'justify-end'
+                    : 'justify-start'
+                "
+              >
+
+                <span
+                  class="text-[10px] font-semibold uppercase tracking-wide text-gray-400"
+                >
+                  {{
+                    msg.senderId === currentUserId
+                      ? 'You'
+                      : 'Other user'
+                  }}
+                </span>
+
+              </div>
+
+              <!-- MESSAGE BUBBLE -->
+              <div
+                class="px-4 py-3 rounded-2xl shadow-sm"
+                [ngClass]="
+                  msg.senderId === currentUserId
+                    ? 'bg-indigo-600 text-white rounded-br-md'
+                    : 'bg-white border border-gray-200 text-gray-800 rounded-bl-md'
+                "
+              >
+
+                <p
+                  class="text-sm leading-6 break-words whitespace-pre-wrap"
+                >
+                  {{ msg.messageText }}
+                </p>
+
+                <div
+                  class="mt-1.5 flex items-center gap-1"
+                  [ngClass]="
+                    msg.senderId === currentUserId
+                      ? 'justify-end text-indigo-100'
+                      : 'justify-end text-gray-400'
+                  "
+                >
+
+                  <span
+                    class="text-[10px]"
+                  >
+                    {{ msg.timestamp | date:'shortTime' }}
+                  </span>
+
+                  <span
+                    *ngIf="msg.senderId === currentUserId"
+                    class="text-[11px]"
+                  >
+                    ✓✓
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ================================================= -->
+        <!-- INPUT -->
+        <!-- ================================================= -->
+
+        <form
+          (ngSubmit)="sendMessage()"
+          class="mt-4"
+        >
+
+          <div
+            class="flex items-end gap-2 p-2 rounded-xl border border-gray-200 bg-white shadow-sm focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100"
+          >
+
+            <input
+              [(ngModel)]="newMessageText"
+              name="messageText"
+              type="text"
+              autocomplete="off"
+              maxlength="2000"
+              placeholder="Write a message..."
+              class="flex-1 min-w-0 bg-transparent border-0 outline-none px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400"
+            />
+
+            <button
+              type="submit"
+              [disabled]="!newMessageText.trim() || !socketConnected"
+              class="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 text-white text-sm font-semibold shadow-sm transition hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+
+              <span>
+                Send
+              </span>
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                class="w-4 h-4"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M22 2 11 13"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m22 2-7 20-4-9-9-4 20-7Z"
+                />
+              </svg>
+
+            </button>
+
+          </div>
+
+          <div
+            class="mt-2 px-1 flex items-center justify-between text-[11px] text-gray-400"
+          >
+
+            <span>
+              Press Enter to send
+            </span>
+
+            <span>
+              {{ newMessageText.length }}/2000
+            </span>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

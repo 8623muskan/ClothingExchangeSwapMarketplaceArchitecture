@@ -1,0 +1,392 @@
+<div class="detail-page">
+
+  <!-- Back -->
+  <button
+    type="button"
+    class="back-button"
+    (click)="goBack()"
+  >
+    <span class="back-icon">←</span>
+    <span>Back to Marketplace</span>
+  </button>
+
+
+  <!-- Loading -->
+  <div
+    *ngIf="loading"
+    class="state-card"
+  >
+    <div class="loading-orb">
+      <span></span>
+    </div>
+
+    <h2>Loading item</h2>
+
+    <p>
+      Please wait while we load the clothing details.
+    </p>
+  </div>
+
+
+  <!-- Error -->
+  <div
+    *ngIf="!loading && errorMessage"
+    class="state-card error-state"
+  >
+
+    <div class="state-icon error-icon">
+      !
+    </div>
+
+    <h2>Unable to load item</h2>
+
+    <p>
+      {{ errorMessage }}
+    </p>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="goBack()"
+    >
+      Back to Marketplace
+    </button>
+
+  </div>
+
+
+  <!-- Item -->
+  <section
+    *ngIf="!loading && item"
+    class="detail-card"
+  >
+
+    <!-- Top Label -->
+    <div class="detail-topbar">
+
+      <div class="detail-eyebrow">
+        <span class="eyebrow-dot"></span>
+        CLOTHING EXCHANGE
+      </div>
+
+      <div class="availability-badge">
+        <span class="availability-dot"></span>
+        Available for Swap
+      </div>
+
+    </div>
+
+
+    <!-- Main Content -->
+    <div class="detail-layout">
+
+
+      <!-- =====================================================
+           IMAGE
+           ===================================================== -->
+
+      <div class="image-column">
+
+        <div class="image-card">
+
+          <div class="image-glow"></div>
+
+          <img
+            *ngIf="item.imageUrl"
+            [src]="'http://127.0.0.1:5000' + item.imageUrl"
+            [alt]="item.title || 'Clothing item'"
+            class="item-image"
+          />
+
+          <div
+            *ngIf="!item.imageUrl"
+            class="no-image"
+          >
+            <div class="no-image-icon">
+              ◇
+            </div>
+
+            <p>No image available</p>
+          </div>
+
+          <div class="image-label">
+            <span>LISTING PHOTO</span>
+          </div>
+
+        </div>
+
+
+        <!-- Image caption -->
+        <div class="image-note">
+          <span class="note-icon">✓</span>
+
+          <span>
+            Verify the item details before requesting a swap.
+          </span>
+        </div>
+
+      </div>
+
+
+
+      <!-- =====================================================
+           INFORMATION
+           ===================================================== -->
+
+      <div class="info-column">
+
+        <!-- Title -->
+        <div class="title-section">
+
+          <div class="category-label">
+            {{ item.category || 'CLOTHING' }}
+          </div>
+
+          <h1>
+            {{ item.title }}
+          </h1>
+
+          <p class="description">
+            {{ item.description || 'No description provided.' }}
+          </p>
+
+        </div>
+
+
+        <!-- Quick Tags -->
+        <div class="quick-tags">
+
+          <span *ngIf="item.condition">
+            <span class="tag-dot"></span>
+            {{ item.condition }}
+          </span>
+
+          <span *ngIf="item.size">
+            Size {{ item.size }}
+          </span>
+
+          <span *ngIf="item.gender">
+            {{ item.gender }}
+          </span>
+
+          <span *ngIf="item.color">
+            {{ item.color }}
+          </span>
+
+        </div>
+
+
+        <!-- Value -->
+        <div class="value-card">
+
+          <div class="value-left">
+
+            <span class="value-label">
+              ESTIMATED VALUE
+            </span>
+
+            <strong>
+              ₹{{ item.estimatedValue || 0 }}
+            </strong>
+
+          </div>
+
+          <div class="value-icon">
+            ₹
+          </div>
+
+        </div>
+
+
+        <!-- Details -->
+        <div class="details-section">
+
+          <div class="section-heading">
+            <span class="section-line"></span>
+
+            <h2>Item Details</h2>
+          </div>
+
+
+          <div class="details-grid">
+
+            <div class="detail-row">
+              <span class="detail-label">
+                Category
+              </span>
+
+              <span class="detail-value">
+                {{ item.category || 'Not specified' }}
+              </span>
+            </div>
+
+
+            <div class="detail-row">
+              <span class="detail-label">
+                Gender
+              </span>
+
+              <span class="detail-value">
+                {{ item.gender || 'Not specified' }}
+              </span>
+            </div>
+
+
+            <div class="detail-row">
+              <span class="detail-label">
+                Size
+              </span>
+
+              <span class="detail-value">
+                {{ item.size || 'Not specified' }}
+              </span>
+            </div>
+
+
+            <div class="detail-row">
+              <span class="detail-label">
+                Brand
+              </span>
+
+              <span class="detail-value">
+                {{ item.brand || 'Not specified' }}
+              </span>
+            </div>
+
+
+            <div class="detail-row">
+              <span class="detail-label">
+                Condition
+              </span>
+
+              <span class="detail-value condition-value">
+                <span class="condition-dot"></span>
+                {{ item.condition || 'Not specified' }}
+              </span>
+            </div>
+
+
+            <div class="detail-row">
+              <span class="detail-label">
+                Color
+              </span>
+
+              <span class="detail-value">
+                {{ item.color || 'Not specified' }}
+              </span>
+            </div>
+
+
+            <div class="detail-row location-row">
+              <span class="detail-label">
+                Location
+              </span>
+
+              <span class="detail-value">
+                <span class="location-icon">⌖</span>
+                {{ item.location || 'Not specified' }}
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Owner -->
+        <div class="owner-card">
+
+          <div class="owner-avatar">
+            {{
+              (
+                item.owner?.name ||
+                item.owner?.username ||
+                item.owner?.email ||
+                'M'
+              ).charAt(0).toUpperCase()
+            }}
+          </div>
+
+          <div class="owner-info">
+
+            <span class="owner-label">
+              LISTED BY
+            </span>
+
+            <strong>
+              {{
+                item.owner?.name ||
+                item.owner?.username ||
+                item.owner?.email ||
+                'Marketplace User'
+              }}
+            </strong>
+
+            <span *ngIf="item.owner?.email">
+              {{ item.owner.email }}
+            </span>
+
+          </div>
+
+          <div class="owner-check">
+            ✓
+          </div>
+
+        </div>
+
+
+        <!-- Actions -->
+        <div class="action-section">
+
+          <button
+           *ngIf="!isOwnItem()"
+            type="button"
+            class="request-button"
+           (click)="requestSwap()"
+           >
+
+<div
+    *ngIf="isOwnItem()"
+     class="own-item-notice"
+>
+  This is your own listing. You cannot request a swap for your own item.
+</div>
+            <span>
+              Request Swap
+            </span>
+
+            <span class="button-arrow">
+              →
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="goBack()"
+          >
+            Back
+          </button>
+
+        </div>
+
+
+        <!-- Brand Website -->
+        <a
+          *ngIf="item.brandWebsite"
+          [href]="item.brandWebsite"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="brand-link"
+        >
+          <span>Visit Brand Website</span>
+          <span>↗</span>
+        </a>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

@@ -1,0 +1,192 @@
+﻿<nav class="bg-white shadow-md sticky top-0 z-50">
+
+  <div
+    class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center"
+  >
+
+    <!-- Logo -->
+    <a
+      routerLink="/marketplace"
+      class="text-xl font-bold text-indigo-600"
+      (click)="closeUserMenu()"
+    >
+      Clothing Swap Marketplace
+    </a>
+
+    <!-- Navigation -->
+    <div
+      class="flex items-center gap-6 font-medium text-gray-700"
+    >
+
+      <a
+        routerLink="/marketplace"
+        class="hover:text-indigo-600 transition"
+        (click)="closeUserMenu()"
+      >
+        Marketplace
+      </a>
+
+      <a
+        *ngIf="isLoggedIn"
+        routerLink="/list-item"
+        class="hover:text-indigo-600 transition"
+        (click)="closeUserMenu()"
+      >
+        List Item
+      </a>
+
+      <a
+        *ngIf="isLoggedIn"
+        routerLink="/dashboard"
+        class="hover:text-indigo-600 transition"
+        (click)="closeUserMenu()"
+      >
+        Dashboard
+      </a>
+
+      <a
+        *ngIf="isLoggedIn && currentUser?.role === 'admin'"
+        routerLink="/admin"
+        class="hover:text-indigo-600 transition"
+        (click)="closeUserMenu()"
+      >
+        Admin
+      </a>
+
+      <!-- Logged out -->
+      <a
+        *ngIf="!isLoggedIn"
+        routerLink="/login"
+        class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+      >
+        Login
+      </a>
+
+      <!-- Logged in account -->
+      <div
+        *ngIf="isLoggedIn"
+        class="relative"
+      >
+
+        <button
+          type="button"
+          (click)="toggleUserMenu()"
+          class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition"
+        >
+
+          <!-- User icon -->
+          <span
+            class="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold"
+          >
+            {{ displayName.charAt(0).toUpperCase() }}
+          </span>
+
+          <span class="hidden sm:block">
+            {{ displayName }}
+          </span>
+
+          <span class="text-gray-500">
+          &#9660;
+          </span>
+
+        </button>
+
+        <!-- Dropdown -->
+        <div
+          *ngIf="showUserMenu"
+          class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden"
+        >
+
+          <!-- User information -->
+          <div
+            class="px-4 py-4 bg-gray-50 border-b"
+          >
+
+            <div class="flex items-center gap-3">
+
+              <div
+                class="w-11 h-11 rounded-full bg-indigo-600 text-white flex items-center justify-center text-lg font-bold"
+              >
+                {{ displayName.charAt(0).toUpperCase() }}
+              </div>
+
+              <div class="min-w-0">
+
+                <p
+                  class="font-semibold text-gray-900 truncate"
+                >
+                  {{ displayName }}
+                </p>
+
+                <p
+                  class="text-sm text-gray-500 truncate"
+                >
+                  {{ displayEmail }}
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Menu -->
+          <div class="py-2">
+
+            <a
+              routerLink="/dashboard"
+              (click)="closeUserMenu()"
+              class="block px-4 py-3 text-gray-700 hover:bg-gray-50 transition"
+            >
+              Dashboard
+            </a>
+
+            <a
+              routerLink="/list-item"
+              (click)="closeUserMenu()"
+              class="block px-4 py-3 text-gray-700 hover:bg-gray-50 transition"
+            >
+              My Listings
+            </a>
+
+            <a
+              routerLink="/dashboard"
+              (click)="closeUserMenu()"
+              class="block px-4 py-3 text-gray-700 hover:bg-gray-50 transition"
+            >
+              Swap Requests
+            </a>
+
+            <button
+              type="button"
+              (click)="logout()"
+              class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition"
+            >
+              Logout
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</nav>
+
+<main class="bg-gray-50 min-h-screen">
+  <router-outlet></router-outlet>
+</main>
+
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->
+<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+
+

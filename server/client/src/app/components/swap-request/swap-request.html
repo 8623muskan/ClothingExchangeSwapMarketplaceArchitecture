@@ -1,0 +1,551 @@
+<main class="swap-page">
+
+  <!-- =====================================================
+       BACK
+       ===================================================== -->
+
+  <button
+    type="button"
+    class="back-button"
+    (click)="cancel()"
+  >
+    <span class="back-icon">←</span>
+    <span>Back to Marketplace</span>
+  </button>
+
+
+  <!-- =====================================================
+       LOADING
+       ===================================================== -->
+
+  <section
+    *ngIf="loading()"
+    class="state-card"
+  >
+
+    <div class="loading-orb">
+      <span></span>
+    </div>
+
+    <h2>
+      Preparing your swap
+    </h2>
+
+    <p>
+      Loading the item and your available listings.
+    </p>
+
+  </section>
+
+
+  <!-- =====================================================
+       ERROR
+       ===================================================== -->
+
+  <section
+    *ngIf="
+      errorMessage() &&
+      !loading() &&
+      !requestedItem()
+    "
+    class="state-card error-state"
+  >
+
+    <div class="state-icon">
+      !
+    </div>
+
+    <h2>
+      Unable to continue
+    </h2>
+
+    <p>
+      {{ errorMessage() }}
+    </p>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="cancel()"
+    >
+      Back to Marketplace
+    </button>
+
+  </section>
+
+
+  <!-- =====================================================
+       SWAP CARD
+       ===================================================== -->
+
+  <section
+    *ngIf="requestedItem() && !loading()"
+    class="swap-card"
+  >
+
+    <!-- ===================================================
+         HEADER
+         =================================================== -->
+
+    <header class="swap-header">
+
+      <div>
+
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          CLOTHING EXCHANGE
+        </div>
+
+        <h1>
+          Request a Swap
+        </h1>
+
+        <p>
+          Choose one of your listings to offer
+          in exchange for this item.
+        </p>
+
+      </div>
+
+      <div class="swap-step">
+        <span>STEP</span>
+        <strong>1</strong>
+        <span>OF</span>
+        <strong>1</strong>
+      </div>
+
+    </header>
+
+
+    <!-- ===================================================
+         REQUESTED ITEM
+         =================================================== -->
+
+    <section class="requested-section">
+
+      <div class="section-title">
+
+        <div class="section-number">
+          01
+        </div>
+
+        <div>
+
+          <h2>
+            Item you want
+          </h2>
+
+          <p>
+            This is the clothing item you're requesting.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="requested-item">
+
+        <div class="requested-image-wrapper">
+
+          <img
+            [src]="getImageUrl(requestedItem().imageUrl)"
+            [alt]="requestedItem().title || 'Clothing item'"
+            (error)="onImageError($event)"
+          />
+
+          <span class="image-badge">
+            YOU WANT
+          </span>
+
+        </div>
+
+
+        <div class="requested-info">
+
+          <span class="item-category">
+            {{ requestedItem().category || 'CLOTHING' }}
+          </span>
+
+          <h2>
+            {{ requestedItem().title }}
+          </h2>
+
+          <p class="item-brand">
+            {{ requestedItem().brand || 'No brand specified' }}
+          </p>
+
+
+          <div class="item-tags">
+
+            <span *ngIf="requestedItem().size">
+              Size {{ requestedItem().size }}
+            </span>
+
+            <span *ngIf="requestedItem().condition">
+              {{ requestedItem().condition }}
+            </span>
+
+            <span *ngIf="requestedItem().color">
+              {{ requestedItem().color }}
+            </span>
+
+          </div>
+
+
+          <div class="requested-value">
+
+            <span>
+              Estimated value
+            </span>
+
+            <strong>
+              ₹{{ requestedItem().estimatedValue || 0 }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         OFFER ITEM
+         =================================================== -->
+
+    <section class="form-section">
+
+      <div class="section-title">
+
+        <div class="section-number">
+          02
+        </div>
+
+        <div>
+
+          <h2>
+            Your offer
+          </h2>
+
+          <p>
+            Select one of your clothing listings to offer.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="userItems().length > 0"
+        class="offer-box"
+      >
+
+        <label for="offeredItem">
+          Select your item
+        </label>
+
+
+        <div class="select-wrapper">
+
+          <select
+            id="offeredItem"
+            [(ngModel)]="selectedOfferedItem"
+          >
+
+            <option
+              value=""
+              disabled
+            >
+              Select your clothing item
+            </option>
+
+
+            <option
+              *ngFor="let item of userItems()"
+              [value]="item._id || item.id"
+            >
+              {{ item.title }}
+              —
+              {{ item.brand || 'No brand' }}
+              —
+              Size {{ item.size || 'N/A' }}
+            </option>
+
+          </select>
+
+
+          <span class="select-arrow">
+            ▾
+          </span>
+
+        </div>
+
+
+        <small class="field-hint">
+          Only your own listings can be offered.
+        </small>
+
+      </div>
+
+
+      <!-- =================================================
+           NO LISTINGS
+           ================================================= -->
+
+      <div
+        *ngIf="userItems().length === 0"
+        class="empty-message"
+      >
+
+        <div class="empty-icon">
+          +
+        </div>
+
+        <div>
+
+          <strong>
+            No clothing listings available
+          </strong>
+
+          <p>
+            You need to list at least one clothing item
+            before you can request a swap.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         MESSAGE
+         =================================================== -->
+
+    <section class="form-section">
+
+      <div class="section-title">
+
+        <div class="section-number">
+          03
+        </div>
+
+        <div>
+
+          <h2>
+            Message
+            <span>Optional</span>
+          </h2>
+
+          <p>
+            Add a short message for the item owner.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="message-box">
+
+        <textarea
+          id="message"
+          [(ngModel)]="message"
+          maxlength="1000"
+          rows="5"
+          placeholder="Tell the owner why you're interested in this swap..."
+        ></textarea>
+
+
+        <div class="message-footer">
+
+          <span>
+            Keep your message friendly and clear.
+          </span>
+
+          <strong>
+            {{ message.length }}/1000
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ===================================================
+         ERROR / PENDING
+         =================================================== -->
+
+    <div
+      *ngIf="pendingRequestExists"
+      class="alert success"
+    >
+      <span class="alert-icon">
+        ✓
+      </span>
+
+      <span>
+        You already have a pending swap request for this item.
+        Check your Dashboard to track it.
+      </span>
+    </div>
+
+    <div
+      *ngIf="errorMessage() && !pendingRequestExists"
+      class="alert error"
+    >
+      <span class="alert-icon">
+        !
+      </span>
+
+      <span>
+        {{ errorMessage() }}
+      </span>
+    </div>
+
+
+    <!-- ===================================================
+         SUCCESS
+         =================================================== -->
+
+    <div
+      *ngIf="successMessage()"
+      class="alert success"
+    >
+
+      <span class="alert-icon">
+        ✓
+      </span>
+
+      <span>
+        {{ successMessage() }}
+      </span>
+
+    </div>
+
+
+    <!-- ===================================================
+         SUMMARY
+         =================================================== -->
+
+    <div
+      *ngIf="
+        selectedOfferedItem &&
+        userItems().length > 0
+      "
+      class="swap-summary"
+    >
+
+      <div class="summary-item">
+
+        <span class="summary-label">
+          YOU WANT
+        </span>
+
+        <strong>
+          {{ requestedItem().title }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-arrow">
+        ⇄
+      </div>
+
+
+      <div class="summary-item offer-summary">
+
+        <span class="summary-label">
+          YOU OFFER
+        </span>
+
+        <strong>
+          {{ getSelectedOfferTitle() }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         ACTIONS
+         =================================================== -->
+
+    <footer class="actions">
+
+      <div class="action-note">
+
+        <span class="secure-icon">
+          ✓
+        </span>
+
+        <span>
+          Your request will be sent directly
+          to the item owner.
+        </span>
+
+      </div>
+
+
+      <div class="action-buttons">
+
+        <!-- CANCEL -->
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="cancel()"
+          [disabled]="submitting()"
+        >
+          Cancel
+        </button>
+
+
+        <!-- SUBMIT -->
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="submitSwapRequest()"
+          [disabled]="
+            submitting() ||
+            pendingRequestExists ||
+            !hasValidOfferItem()
+          "
+        >
+
+          <span>
+            {{ submitting() ? 'Submitting...' : 'Submit' }}
+          </span>
+
+
+          <span
+            *ngIf="!submitting()"
+            class="button-arrow"
+          >
+            →
+          </span>
+
+
+          <span
+            *ngIf="submitting()"
+            class="spinner"
+          ></span>
+
+        </button>
+
+      </div>
+
+    </footer>
+
+  </section>
+
+</main>
